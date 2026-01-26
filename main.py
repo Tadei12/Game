@@ -13,6 +13,9 @@ run = True
 computer_off = pygame.transform.scale(pygame.image.load("assets/computer/off.png"), (400, 350))
 computer_on = pygame.transform.scale(pygame.image.load("assets/computer/on.png"), (400, 350))
 
+game_background_n1 = pygame.transform.scale(pygame.image.load("assets/game/background_-1.png"), (1100, 700))
+game_background_0 = pygame.transform.scale(pygame.image.load("assets/game/background_0.png"), (1100, 700))
+
 key_press = ""
 
 mouse_pos = (0, 0)
@@ -70,9 +73,16 @@ def game():
 
     window.fill((150, 200, 255))
 
+    if looking == -1:
+        window.blit(game_background_n1, (0, 0))
+
     if looking == 0:
         if key_press == "q":
             computer_status = not computer_status
+
+        window.blit(game_background_0, (0, 0))
+
+        pygame.draw.rect(window, (200, 100, 0), (0, 450, window_w, 200))
 
         if computer_status:
             window.blit(computer_on, (350, 250))
