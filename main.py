@@ -148,7 +148,7 @@ def game():
 
     window.blit(shade, (0, 50))
 
-    if not door_status and light_status and not window_status:
+    if not door_status and light_status and not window_status and not computer_status:
         if key_press == "a":
             if looking > -1:
                 looking -= 1
@@ -187,3 +187,4 @@ while run:
     pygame.display.update()
 
     Clock.tick(60)
+
