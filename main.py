@@ -6,6 +6,14 @@ window_w, window_h = 1100, 700
 window = pygame.display.set_mode((window_w, window_h))
 pygame.display.set_caption("Game")
 
+
+window.fill((0,0,0))
+font = pygame.font.Font("assets/font.ttf", 30)
+text = font.render("Loading...", True, (255, 255, 255))
+window.blit(text, (0, window_h-40))
+pygame.display.update()
+
+
 Clock = pygame.time.Clock()
 
 run = True
@@ -13,13 +21,33 @@ run = True
 computer_off = pygame.transform.scale(pygame.image.load("assets/computer/off.png"), (400, 350))
 computer_on = pygame.transform.scale(pygame.image.load("assets/computer/on.png"), (400, 350))
 
-game_background_n1 = pygame.transform.scale(pygame.image.load("assets/game/background_-1.png"), (1100, 700))
+game_background_n1open = pygame.transform.scale(pygame.image.load("assets/game/background_-1open.png"), (1100, 700))
+game_background_n1closed = pygame.transform.scale(pygame.image.load("assets/game/background_-1closed.png"), (1100, 700))
+
+door_rect = pygame.Rect(325, 25, 450, 575)
+
+game_background_1open = pygame.transform.scale(pygame.image.load("assets/game/background_1open.png"), (1100, 700))
+game_background_1closed = pygame.transform.scale(pygame.image.load("assets/game/background_1closed.png"), (1100, 700))
+
+window_rect = pygame.Rect(375, 50, 350, 500)
+
 game_background_0 = pygame.transform.scale(pygame.image.load("assets/game/background_0.png"), (1100, 700))
+
+light_switch = pygame.transform.scale(pygame.image.load("assets/game/light_switch.png"), (50, 75))
+light_switch_rect = light_switch.get_rect()
+light_switch_rect.x, light_switch_rect.y = 225, 250
+
+shade = pygame.Surface((window_w, window_h), pygame.SRCALPHA)
+
+for y in range(window_h):
+    alpha = int((y / window_h) * 255)
+    pygame.draw.line(shade, (0, 0, 0, alpha), (0, y), (window_w, y))
 
 key_press = ""
 
 mouse_pos = (0, 0)
 mouse_click = 0
+mouse_hold = 0
 
 class TextButton:
     def __init__(self, rect_value, text):
@@ -67,14 +95,32 @@ def menu():
 
 looking = 0
 computer_status = 0
+door_status = 0
+light_status = 1
+window_status = 0
 
 def game():
-    global looking, computer_status
+    global looking, computer_status, door_status, light_status, window_status
 
     window.fill((150, 200, 255))
 
     if looking == -1:
-        window.blit(game_background_n1, (0, 0))
+        if light_status:
+            if door_status:
+                window.blit(game_background_n1closed, (0, 0))
+            else:
+                window.blit(game_background_n1open, (0, 0))
+            
+            if door_rect.collidepoint(mouse_pos) and mouse_hold == 1:
+                door_status = 1
+            else:
+                door_status = 0
+        else:
+            window.fill((0, 0, 0))
+
+        window.blit(light_switch, light_switch_rect)
+        if light_switch_rect.collidepoint(mouse_pos) and mouse_click == 1:
+            light_status = not light_status
 
     if looking == 0:
         if key_press == "q":
@@ -82,19 +128,33 @@ def game():
 
         window.blit(game_background_0, (0, 0))
 
-        pygame.draw.rect(window, (200, 100, 0), (0, 450, window_w, 200))
+        pygame.draw.rect(window, (150, 150, 150), (0, 450, window_w, 200))
 
         if computer_status:
             window.blit(computer_on, (350, 250))
         else:
             window.blit(computer_off, (350, 250))
-    
-    if key_press == "a":
-        if looking > -1:
-            looking -= 1
-    if key_press == "d":
-        if looking < 1:
-            looking += 1
+
+    if looking == 1:
+        if window_status:
+            window.blit(game_background_1closed, (0, 0))
+        else:
+            window.blit(game_background_1open, (0, 0))
+        
+        if window_rect.collidepoint(mouse_pos) and mouse_hold == 1:
+            window_status = 1
+        else:
+            window_status = 0
+
+    window.blit(shade, (0, 50))
+
+    if not door_status and light_status and not window_status:
+        if key_press == "a":
+            if looking > -1:
+                looking -= 1
+        if key_press == "d":
+            if looking < 1:
+                looking += 1
 
 while run:
     key_press = ""
@@ -108,8 +168,11 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 mouse_click = 1
+                mouse_hold = 1
             if event.button == 2:
                 mouse_click = 2
+        if event.type == pygame.MOUSEBUTTONUP:
+            mouse_hold = 0
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 in_menu = True
