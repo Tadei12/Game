@@ -1,3 +1,5 @@
+import time
+
 import pygame
 
 pygame.init()
@@ -6,17 +8,23 @@ window_w, window_h = 1100, 700
 window = pygame.display.set_mode((window_w, window_h))
 pygame.display.set_caption("Game")
 
+with open("assets/language", "r") as file:
+    language = file.read()
 
 window.fill((0,0,0))
-font = pygame.font.Font("assets/font.ttf", 30)
-text = font.render("Loading...", True, (255, 255, 255))
-window.blit(text, (0, window_h-40))
+loading_font = pygame.font.Font("assets/font.ttf", 30)
+if language == "english":
+    loading_text = loading_font.render("Loading...", True, (255, 255, 255))
+else:
+    loading_text = loading_font.render("Завантажування...", True, (255, 255, 255))
+window.blit(loading_text, (0, window_h-40))
 pygame.display.update()
-
 
 Clock = pygame.time.Clock()
 
 run = True
+
+game_background_0 = pygame.transform.scale(pygame.image.load("assets/game/background_0.png"), (1100, 700))
 
 computer_off = pygame.transform.scale(pygame.image.load("assets/computer/off.png"), (400, 350))
 computer_on = pygame.transform.scale(pygame.image.load("assets/computer/on.png"), (400, 350))
@@ -31,11 +39,13 @@ game_background_1closed = pygame.transform.scale(pygame.image.load("assets/game/
 
 window_rect = pygame.Rect(375, 50, 350, 500)
 
-game_background_0 = pygame.transform.scale(pygame.image.load("assets/game/background_0.png"), (1100, 700))
-
 light_switch = pygame.transform.scale(pygame.image.load("assets/game/light_switch.png"), (50, 75))
 light_switch_rect = light_switch.get_rect()
 light_switch_rect.x, light_switch_rect.y = 225, 250
+
+pygame.mixer.init()
+
+computer_sound = pygame.mixer.Sound("assets/sound/computer_noises.mp3")
 
 shade = pygame.Surface((window_w, window_h), pygame.SRCALPHA)
 
@@ -73,9 +83,14 @@ class TextButton:
 
         return False
 
-Play_button = TextButton((30, 300, 200, 60), "Play")
-Placeholder_button = TextButton((30, 380, 200, 60), "...")
-Exit_button = TextButton((30, 460, 200, 60), "Exit")
+if language == "english":
+    Play_button = TextButton((30, 300, 200, 60), "Play")
+    Language_button = TextButton((30, 380, 200, 60), "Ukr")
+    Exit_button = TextButton((30, 460, 200, 60), "Exit")
+elif language == "ukrainian":
+    Play_button = TextButton((30, 300, 200, 60), "Грати")
+    Language_button = TextButton((30, 380, 200, 60), "Англ.")
+    Exit_button = TextButton((30, 460, 200, 60), "Вийти")
 
 in_menu = True
 
@@ -87,11 +102,24 @@ def menu():
     if Play_button.update():
         in_menu = False
 
-    if Placeholder_button.update():
-        pass
+    if Language_button.update():
+        import sys
+        import subprocess
+        with open("assets/language", "w") as file:
+            if language == "english":
+                file.write("ukrainian")
+            else:
+                file.write("english")
+        subprocess.Popen([sys.executable] + sys.argv)
+        sys.exit()
 
     if Exit_button.update():
         run = False
+
+def mascot_leave():
+    window.fill((20, 20, 20))
+    pygame.display.update()
+    time.sleep(0.1)
 
 looking = 0
 computer_status = 0
@@ -99,8 +127,13 @@ door_status = 0
 light_status = 1
 window_status = 0
 
+font = pygame.font.Font("assets/font.ttf", 30)
+boot_time = "None"
+night_percent = 0
+previous_percent = 0
+
 def game():
-    global looking, computer_status, door_status, light_status, window_status
+    global looking, computer_status, door_status, light_status, window_status, boot_time, night_percent, previous_percent
 
     window.fill((150, 200, 255))
 
@@ -125,6 +158,13 @@ def game():
     if looking == 0:
         if key_press == "q":
             computer_status = not computer_status
+            if computer_status:
+                time.sleep(0.15)
+                computer_sound.play(-1)
+                boot_time = pygame.time.get_ticks()
+            else:
+                computer_sound.stop()
+                previous_percent = night_percent
 
         window.blit(game_background_0, (0, 0))
 
@@ -132,6 +172,19 @@ def game():
 
         if computer_status:
             window.blit(computer_on, (350, 250))
+
+            night_percent = int((pygame.time.get_ticks() - boot_time)/2400+previous_percent)
+
+            if language == "english":
+                text = font.render(f"Working: {night_percent}%", True, (255, 255, 255))
+            else:
+                text = font.render(f"Робота: {night_percent}%", True, (255, 255, 255))
+            text_rect = text.get_rect(center=(550, 425))
+
+            window.blit(text, text_rect)
+
+            if night_percent >= 100:
+                time.sleep(0.5)
         else:
             window.blit(computer_off, (350, 250))
 
@@ -187,4 +240,3 @@ while run:
     pygame.display.update()
 
     Clock.tick(60)
-
