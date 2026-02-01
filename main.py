@@ -8,15 +8,9 @@ window_w, window_h = 1100, 700
 window = pygame.display.set_mode((window_w, window_h))
 pygame.display.set_caption("Game")
 
-with open("assets/language", "r") as file:
-    language = file.read()
-
 window.fill((0,0,0))
 loading_font = pygame.font.Font("assets/font.ttf", 30)
-if language == "english":
-    loading_text = loading_font.render("Loading...", True, (255, 255, 255))
-else:
-    loading_text = loading_font.render("Завантажування...", True, (255, 255, 255))
+loading_text = loading_font.render("...", True, (255, 255, 255))
 window.blit(loading_text, (0, window_h-40))
 pygame.display.update()
 
@@ -24,10 +18,50 @@ Clock = pygame.time.Clock()
 
 run = True
 
+import json
+
+with open("assets/settings.json", "r") as file:
+    settings = json.load(file)
+
+language = settings["language"]
+
+if language == "eng":
+    loading_text = loading_font.render("Loading...", True, (255, 255, 255))
+else:
+    loading_text = loading_font.render("Завантажування...", True, (255, 255, 255))
+
 game_background_0 = pygame.transform.scale(pygame.image.load("assets/game/background_0.png"), (1100, 700))
+
+window.blit(game_background_0, (0, 0))
+window.blit(loading_text, (0, window_h-40))
+pygame.display.update()
 
 computer_off = pygame.transform.scale(pygame.image.load("assets/computer/off.png"), (400, 350))
 computer_on = pygame.transform.scale(pygame.image.load("assets/computer/on.png"), (400, 350))
+
+studio_logo = pygame.transform.scale(pygame.image.load("assets/studio_logo.png"), (300, 300))
+
+shade = pygame.Surface((window_w, window_h), pygame.SRCALPHA)
+for y in range(window_h):
+    alpha = int((y / window_h) * 255)
+    pygame.draw.line(shade, (0, 0, 0, alpha), (0, y), (window_w, y))
+
+def draw_bg_screen():
+    window.blit(game_background_0, (0, 0))
+    pygame.draw.rect(window, (150, 150, 150), (0, 450, window_w, 200))
+    window.blit(computer_off, (350, 250))
+    window.blit(shade, (0, 50))
+
+def draw_loading_screen(intro=False):
+    draw_bg_screen()
+    window.blit(loading_text, (0, window_h-40))
+    if intro:
+        window.blit(studio_logo, (400, 200))
+    pygame.display.update()
+    if intro:
+        time.sleep(1)
+
+draw_loading_screen(True)
 
 game_background_n1open = pygame.transform.scale(pygame.image.load("assets/game/background_-1open.png"), (1100, 700))
 game_background_n1closed = pygame.transform.scale(pygame.image.load("assets/game/background_-1closed.png"), (1100, 700))
@@ -45,13 +79,8 @@ light_switch_rect.x, light_switch_rect.y = 225, 250
 
 pygame.mixer.init()
 
-computer_sound = pygame.mixer.Sound("assets/sound/computer_noises.mp3")
-
-shade = pygame.Surface((window_w, window_h), pygame.SRCALPHA)
-
-for y in range(window_h):
-    alpha = int((y / window_h) * 255)
-    pygame.draw.line(shade, (0, 0, 0, alpha), (0, y), (window_w, y))
+computer_sound = pygame.mixer.Sound("assets/sound/computer_noise.mp3")
+pygame.mixer.music.load("assets/sound/office_ambience.mp3")
 
 key_press = ""
 
@@ -83,11 +112,11 @@ class TextButton:
 
         return False
 
-if language == "english":
+if language == "eng":
     Play_button = TextButton((30, 300, 200, 60), "Play")
     Language_button = TextButton((30, 380, 200, 60), "Ukr")
     Exit_button = TextButton((30, 460, 200, 60), "Exit")
-elif language == "ukrainian":
+elif language == "ukr":
     Play_button = TextButton((30, 300, 200, 60), "Грати")
     Language_button = TextButton((30, 380, 200, 60), "Англ.")
     Exit_button = TextButton((30, 460, 200, 60), "Вийти")
@@ -96,25 +125,42 @@ in_menu = True
 
 def menu():
     global in_menu, run
-    window.fill((0, 0, 0))
+
+    draw_bg_screen()
+
     pygame.draw.rect(window, (100, 100, 100), (0, 0, window_w/4, window_h))
+
+    pygame.mixer.music.stop()
 
     if Play_button.update():
         in_menu = False
+        pygame.mixer.music.play(-1)
 
     if Language_button.update():
         import sys
         import subprocess
-        with open("assets/language", "w") as file:
-            if language == "english":
-                file.write("ukrainian")
-            else:
-                file.write("english")
+
+        global language
+
+        if language == "eng":
+            language = "ukr"
+        else:
+            language = "eng"
+
+        data = {
+            "language": language
+        }
+        with open("assets/settings.json", "w") as file:
+            file.write(json.dumps(data, indent=4))
+
         subprocess.Popen([sys.executable] + sys.argv)
         sys.exit()
 
     if Exit_button.update():
         run = False
+
+def day():
+    pass
 
 def mascot_leave():
     window.fill((20, 20, 20))
@@ -132,7 +178,7 @@ boot_time = "None"
 night_percent = 0
 previous_percent = 0
 
-def game():
+def office():
     global looking, computer_status, door_status, light_status, window_status, boot_time, night_percent, previous_percent
 
     window.fill((150, 200, 255))
@@ -159,7 +205,6 @@ def game():
         if key_press == "q":
             computer_status = not computer_status
             if computer_status:
-                time.sleep(0.15)
                 computer_sound.play(-1)
                 boot_time = pygame.time.get_ticks()
             else:
@@ -175,7 +220,7 @@ def game():
 
             night_percent = int((pygame.time.get_ticks() - boot_time)/2400+previous_percent)
 
-            if language == "english":
+            if language == "eng":
                 text = font.render(f"Working: {night_percent}%", True, (255, 255, 255))
             else:
                 text = font.render(f"Робота: {night_percent}%", True, (255, 255, 255))
@@ -235,7 +280,7 @@ while run:
     if in_menu:
         menu()
     else:
-        game()
+        office()
 
     pygame.display.update()
 
