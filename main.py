@@ -343,6 +343,8 @@ def day():
             transition("22:00")
         music_switch(game_state)
 
+        Load_MascotValues()
+
     if language == "eng":
         draw_text(f"Day: {current_day}", standart_font, (950, 50))
     else:
@@ -464,7 +466,9 @@ Dog_level = 0
 def BunnyMascot():
     global Bunny_pos, jumpscare
     
-    local_level = Bunny_level + computer_status*2
+    local_level = 0
+    if Bunny_level > 0:
+        local_level = Bunny_level + computer_status*2
 
     if local_level >= random.randint(1, 10):
         Bunny_pos += 1
@@ -482,7 +486,9 @@ def BunnyMascot():
 def FoxMascot():
     global Fox_pos, jumpscare
     
-    local_level = Fox_level + computer_status*2
+    local_level = 0
+    if Fox_level > 0:
+        local_level = Fox_level + computer_status*2
 
     if local_level >= random.randint(1, 10):
         Fox_pos += 1
@@ -500,7 +506,9 @@ def FoxMascot():
 def DogMascot():
     global Dog_pos, jumpscare
     
-    local_level = Dog_level + computer_status*2
+    local_level = 0
+    if Dog_level > 0:
+        local_level = Dog_level + computer_status*2
 
     if local_level >= random.randint(1, 10):
         Dog_pos += 1
