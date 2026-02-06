@@ -316,8 +316,9 @@ def menu():
             in_menu = False
             game_state = 1
             music_switch(game_state)
-
             LoadFunc()
+
+            recou()
 
         if Back_button.update():
             menu_state = 0
@@ -799,15 +800,27 @@ def CountMascots():
     if BuyFox: mascot_count += 1
     if BuyDog: mascot_count += 1
 
+day_surface = build_day_surface()
+
+def recou():
+    if current_floor: Floor_button.sold = True
+    else: Floor_button.sold = False
+
+    if BuyBunny: Bunny_button.sold = True
+    else: Bunny_button.sold = False
+
+    if BuyFox: Fox_button.sold = True
+    else: Fox_button.sold = False
+
+    if BuyDog: Dog_button.sold = True
+    else: Dog_button.sold = False
+
+    global day_surface
+    day_surface = build_day_surface()
 
 LoadFunc()
 
-if current_floor: Floor_button.sold = True
-if BuyBunny: Bunny_button.sold = True
-if BuyFox: Fox_button.sold = True
-if BuyDog: Dog_button.sold = True
-
-day_surface = build_day_surface()
+recou()
 
 while run:
     key_press = ""
