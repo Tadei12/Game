@@ -507,19 +507,19 @@ def Load_MascotValues():
         Dog_level = 3
 
     elif current_day == 4:
-        Bunny_level = 4
+        Bunny_level = 5
         Fox_level = 4
         Dog_level = 4
     
     elif current_day == 5:
-        Bunny_level = 5
+        Bunny_level = 6
         Fox_level = 5
-        Dog_level = 6
+        Dog_level = 7
     
     elif current_day == 6:
-        Bunny_level = 7
+        Bunny_level = 6
         Fox_level = 6
-        Dog_level = 7
+        Dog_level = 8
     
     elif current_day == 7:
         Bunny_level = 8
