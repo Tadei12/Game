@@ -112,9 +112,7 @@ door_sound = pygame.mixer.Sound("assets/sound/door.mp3")
 window_sound = pygame.mixer.Sound("assets/sound/window.mp3")
 lightSwitch_sound = pygame.mixer.Sound("assets/sound/lightSwitch.mp3")
 jumpscare_sound = pygame.mixer.Sound("assets/sound/jumpscare.mp3")
-jumpscare_sound.set_volume(0.7)
 footstep_sound = pygame.mixer.Sound("assets/sound/footstep.mp3")
-footstep_sound.set_volume(0.7)
 
 office_ambience = "assets/sound/office_ambience.mp3"
 pizzeria_music = "assets/sound/pizzeria_music.mp3"
@@ -416,10 +414,11 @@ def draw_text(text, text_font, text_center, text_colour=(0, 0, 0)):
 
 help_font = pygame.font.Font("assets/font.ttf", 20)
 show_help = True
-def draw_help(text, colour):
+def draw_help(text, colour, pos_count=0):
     if show_help:
         text_surface = help_font.render(text, True, colour)
-        text_rect = text_surface.get_rect(center=(1000, 675))
+        text_rect = text_surface.get_rect(center=(1000, 675-pos_count*25))
+        text_rect.right = 1090
 
         window.blit(text_surface, text_rect)
 
@@ -834,11 +833,15 @@ def office():
             if looking < 1:
                 looking += 1
 
-    if looking == 0:
-        if language == "eng":
-            draw_help("Q - computer", (255, 255, 255))
-        else:
-            draw_help("Q - комп'ютер", (255, 255, 255))
+    
+    if language == "eng":
+        draw_help("A, D - turn", (255, 255, 255))
+        if looking == 0:
+            draw_help("Q - computer", (255, 255, 255), 1)
+    else:
+        draw_help("A, D - обернутися", (255, 255, 255))
+        if looking == 0:
+            draw_help("Q - комп'ютер", (255, 255, 255), 1)
 
 def final_lawsuit():
     window.fill((0, 0, 0))
