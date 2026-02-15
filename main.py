@@ -62,7 +62,18 @@ def draw_loading_screen(intro=False):
     if intro:
         time.sleep(0.5)
 
+standart_font = pygame.font.Font("assets/font.ttf", 60)
+lawsuit_font = pygame.font.Font("assets/lawsuit_font.ttf", 30)
+nametext_font = pygame.font.Font("assets/nametext_font.ttf", 65)
+
 draw_loading_screen(True)
+
+nametext_surface1 = nametext_font.render("7-Day", True, (255, 255, 255))
+nametext_surface2 = nametext_font.render("Business", True, (255, 255, 255))
+
+def draw_nametext():
+    window.blit(nametext_surface1, (13, 60))
+    window.blit(nametext_surface2, (13, 125))
 
 game_background_n1open = pygame.transform.scale(pygame.image.load("assets/game/background_-1open.png"), (1100, 700))
 game_background_n1closed = pygame.transform.scale(pygame.image.load("assets/game/background_-1closed.png"), (1100, 700))
@@ -98,9 +109,6 @@ shop_icon_rect = pygame.rect.Rect((1000, 600, 75, 75))
 
 Bunny_door = pygame.transform.scale(pygame.image.load("assets/mascots/bunny.png"), (1100, 700))
 Fox_door = pygame.transform.scale(pygame.image.load("assets/mascots/fox.png"), (1100, 700))
-
-standart_font = pygame.font.Font("assets/font.ttf", 60)
-lawsuit_font = pygame.font.Font("assets/lawsuit_font.ttf", 30)
 
 pygame.mixer.init()
 
@@ -248,6 +256,11 @@ menu_state = 0
 
 current_day = 1
 
+menu1_screen = pygame.Surface((1100, 700))
+menu1_screen.blit(floor_default, (0, 0))
+menu1_screen.blit(day_stage, (0, 0))
+menu1_screen.blit(shade, (0, 50))
+
 def menu():
     global language, money, current_floor, current_tables, current_day
     global in_menu, run, game_state, menu_state
@@ -256,6 +269,8 @@ def menu():
         draw_bg_screen()
 
         pygame.draw.rect(window, (100, 100, 100), (0, 0, window_w/4, window_h))
+
+        draw_nametext()
 
         pygame.mixer.music.stop()
 
@@ -291,11 +306,11 @@ def menu():
             run = False
 
     elif menu_state == 1:
-        window.blit(floor_default, (0, 0))
-        window.blit(day_stage, (0, 0))
-        window.blit(shade, (0, 50))
+        window.blit(menu1_screen, (0, 0))
 
         pygame.draw.rect(window, (100, 100, 100), (0, 0, window_w/4, window_h))
+
+        draw_nametext()
 
         pygame.mixer.music.stop()
 
@@ -691,13 +706,13 @@ door_status = 0
 light_status = 1
 window_status = 0
 
-font = pygame.font.Font("assets/font.ttf", 30)
+office_font = pygame.font.Font("assets/font.ttf", 30)
 boot_time = "None"
 night_percent = 0
 previous_percent = night_percent
 
 def office():
-    global looking, computer_status, door_status, light_status, window_status, boot_time, night_percent, previous_percent
+    global looking, computer_status, door_status, light_status, window_status, boot_time, night_percent, previous_percent, current_day
 
     if debug:
         if key_press == "0":
@@ -745,15 +760,14 @@ def office():
             night_percent = int((pygame.time.get_ticks() - boot_time)/800+previous_percent)
 
             if language == "eng":
-                text = font.render(f"Working: {night_percent}%", True, (255, 255, 255))
+                draw_text(f"Working: {night_percent}%", office_font, (550, 425), (255, 255, 255))
+                draw_text(f"День: {current_day}", office_font, (425, 295), (255, 255, 255))
             else:
-                text = font.render(f"Робота: {night_percent}%", True, (255, 255, 255))
-            text_rect = text.get_rect(center=(550, 425))
-
-            window.blit(text, text_rect)
+                draw_text(f"Робота: {night_percent}%", office_font, (550, 425), (255, 255, 255))
+                draw_text(f"Day: {current_day}", office_font, (425, 295), (255, 255, 255))
 
             if night_percent >= 100:
-                global game_state, current_day
+                global game_state
 
                 computer_status = 0
                 boot_time = "None"
@@ -833,7 +847,6 @@ def office():
             if looking < 1:
                 looking += 1
 
-    
     if language == "eng":
         draw_help("A, D - turn", (255, 255, 255))
         if looking == 0:
@@ -842,7 +855,7 @@ def office():
         draw_help("A, D - обернутися", (255, 255, 255))
         if looking == 0:
             draw_help("Q - комп'ютер", (255, 255, 255), 1)
-
+        
 def final_lawsuit():
     window.fill((0, 0, 0))
     if language == "eng":
