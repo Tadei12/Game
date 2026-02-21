@@ -7,7 +7,6 @@ pygame.init()
 
 window_w, window_h = 1100, 700
 window = pygame.display.set_mode((window_w, window_h))
-pygame.display.set_caption("Game")
 
 window.fill((0,0,0))
 loading_font = pygame.font.Font("assets/font.ttf", 30)
@@ -28,8 +27,10 @@ language = settings["language"]
 
 if language == "eng":
     loading_text = loading_font.render("Loading...", True, (255, 255, 255))
+    pygame.display.set_caption("7-Day Business - english")
 else:
     loading_text = loading_font.render("Завантажування...", True, (255, 255, 255))
+    pygame.display.set_caption("7-Day Business - ukrainian")
 
 game_background_0 = pygame.transform.scale(pygame.image.load("assets/game/background_0.png"), (1100, 700))
 
@@ -531,6 +532,33 @@ def transition(text, text2="NO TEXT"):
         pygame.display.update()
         time.sleep(2)
 
+def mascot_tutorial(text, text2):
+    pygame.mixer.music.stop()
+    computer_sound.stop()
+
+    time.sleep(1)
+
+    text_surface = office_font.render(text, True, (255, 255, 255))
+    text_rect = text_surface.get_rect(center=(550, 300))
+
+    window.blit(text_surface, text_rect)
+
+    text_surface = office_font.render(text2, True, (255, 255, 255))
+    text_rect = text_surface.get_rect(center=(550, 330))
+
+    window.blit(text_surface, text_rect)
+
+    if language == "eng":
+        text_surface = office_font.render("When the screen flashes, he leaves.", True, (255, 255, 255))
+    else:
+        text_surface = office_font.render("Коли екран блимає він покинув.", True, (255, 255, 255))
+    text_rect = text_surface.get_rect(center=(550, 400))
+
+    window.blit(text_surface, text_rect)
+
+    pygame.display.update()
+    time.sleep(5)
+
 def Load_MascotValues():
     global Bunny_level, Fox_level, Dog_level
 
@@ -591,7 +619,7 @@ def BunnyMascot():
             Bunny_pos = 1
         if Bunny_pos == 3:
             if not door_status:
-                jumpscare = 1
+                jumpscare = "Bunny"
             Bunny_pos = 2
     
     if door_status:
@@ -611,7 +639,7 @@ def FoxMascot():
             Fox_pos = 1
         if Fox_pos == 3:
             if light_status:
-                jumpscare = 1
+                jumpscare = "Fox"
             Fox_pos = 2
     
     if not light_status:
@@ -633,7 +661,7 @@ def DogMascot():
             footstep_sound.play(loops=1)
         if Dog_pos == 3:
             if not window_status:
-                jumpscare = 1
+                jumpscare = "Dog"
             Dog_pos = 2
 
     if window_status:
@@ -811,9 +839,7 @@ def office():
             window_sound.play()
 
     global jumpscare
-    if jumpscare:
-        jumpscare = 0
-
+    if jumpscare != 0:
         computer_sound.stop()
         jumpscare_sound.play()
 
@@ -827,7 +853,25 @@ def office():
             transition("10:00 PM")
         else:
             transition("22:00")
+        
+        if language == "eng":
+            if jumpscare == "Bunny":
+                mascot_tutorial("If you see a bunny in the door,", "close it until he leaves")
+            elif jumpscare == "Fox":
+                mascot_tutorial("If you see yellow eyes in the door,", "turn off the lights until the Fox leaves")
+            else:
+                mascot_tutorial("If you hear footsteps, close the blinds", "until the Dog leaves")
+        else:
+            if jumpscare == "Bunny":
+                mascot_tutorial("Якщо видно зайця в дверях,", "закрий їх аж доки він не покине")
+            elif jumpscare == "Fox":
+                mascot_tutorial("Якщо видно жовті очі в дверях,", "вимкни світло аж доки Лисиця не покине")
+            else:
+                mascot_tutorial("Якщо чути що хтось ходить, закрий", "двері аж доки Собака не покине")
+
         music_switch(game_state)
+
+        jumpscare = 0
 
     UpdateMascots()
 
